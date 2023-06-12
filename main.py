@@ -6,7 +6,6 @@ import sys
 import pygame as pg
 import random as rnd
 from threading import Timer
-import gtts
 from plasma import csPlasma
 
 class csTabButton:
@@ -56,9 +55,6 @@ class csDNB:
                     self.text = text
                     break
 
-            if self.is_voice:
-                csDNB.saymsg(text)
-
             if len(self.seq_a) > self.n:
                 self.seq_a.pop(0)
 
@@ -94,15 +90,6 @@ class csDNB:
 
         pg.font.init()
         self.font = pg.font.SysFont('arial', self.h // 2)
-
-    def cre8msg(msg, fname):
-        tts = gtts.gTTS(msg, lang = 'ru')
-        tts.save(f'audio/{fname}.mp3')
-
-    def saymsg(fname, vol=1):
-        pg.mixer.music.load(f'audio/{fname}.mp3')
-        pg.mixer.music.set_volume(vol)
-        pg.mixer.music.play()
 
     def __init__(self):
         pg.init()
@@ -154,14 +141,7 @@ class csDNB:
         self.text = 'A'
         self.i_on_fx = 0
 
-        #self.is_text_buttons = False
         self.is_text_buttons = True
-        self.is_voice = False
-
-        if self.is_voice:
-            for i in range(9):
-                s = chr(ord('А') + i)
-                csDNB.cre8msg(s, s)
 
         self.plasma = csPlasma(sc)
         rnd.seed()
