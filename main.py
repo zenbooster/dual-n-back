@@ -8,16 +8,65 @@ import random as rnd
 from threading import Timer
 from plasma import csPlasma
 
-class csTabButton:
-    def __init__(self, sc, x, y, w, h):
+class csUtil:
+    def rect_text(sc, c, x, y, w, h, tsc, tw, th):
+        '''
+        if c == self.color_on:
+            if not self.i_on_fx:
+                self.i_on_fx = 255
+            else:
+                if self.i_on_fx > 20:
+                    self.i_on_fx -= 20
+        
+        c = (self.i_on_fx, max(self.i_on_fx, self.brightness), self.i_on_fx)
+        '''
+
+        pg.draw.rect(sc, c, (x, y, w, h))
+        sc.blit(tsc, (x + (w - tw) // 2, y + (h - th) // 2))
+
+class csTabButtonCtx:
+    def __init__(self, sc, w, h, brightness, color_on, color_off, font):
         self.sc = sc
-        self.x = x
-        self.y = y
         self.w = w
         self.h = h
+        #self.tsc = tsc
+        #self.tw = tw
+        #self.th = th
+        self.brightness = brightness
+        self.color_on = color_on
+        self.color_off = color_off
+        self.font = font
     
-    def run(self):
-        pass
+    def set_text(self, text):
+        self.tsc = self.font.render(text, False, (self.brightness, 0, 0))
+        self.tw, self.th = self.font.size(text)
+
+
+class csTabButton:
+    def __init__(self, ctx, x, y):
+        self.ctx = ctx
+        self.x = x
+        self.y = y
+    
+    def run(self, is_on, is_text):
+        sc = self.ctx.sc
+        x = self.x
+        y = self.y
+        w = self.ctx.w
+        h = self.ctx.h
+        tsc = self.ctx.tsc
+        tw = self.ctx.tw
+        th = self.ctx.th
+        color_on = self.ctx.color_on
+        color_off = self.ctx.color_off
+        if is_on:
+            if is_text:
+                csUtil.rect_text(sc, color_on, x, y, w, h, tsc, tw, th)
+            else:
+                pg.draw.rect(sc, color_on, (x, y, w, h))
+        else:
+            pg.draw.rect(sc, color_off, (x, y, w, h))
+
 
 class csDNB:
     def timeout(self):
@@ -65,8 +114,7 @@ class csDNB:
             self.seq_b.append(text)
             
             if self.is_text_buttons:
-                self.text_surface = self.font.render(text, False, (self.brightness, 0, 0))
-                self.text_w, self.text_h = self.font.size(text)
+                self.ctx.set_text(text)
 
             self.i_step += 1
 
@@ -78,8 +126,6 @@ class csDNB:
         self.height = height = self.sc.get_height()
 
         pan_indent = self.pan_indent = self.indent * 2
-        #self.y_butt = y_butt = height - height // 10 - pan_indent
-        #pan_top = self.pan_top = y_butt - pan_indent
         pan_top = self.pan_top = height - height // 10 - 2*pan_indent
         self.y_butt = pan_top + pan_indent
 
@@ -90,6 +136,17 @@ class csDNB:
 
         pg.font.init()
         self.font = pg.font.SysFont('arial', self.h // 2)
+        
+        self.sc_tab = sc_tab = pg.Surface((self.w + 2 * self.ww, self.h + 2 * self.hh))
+        sc_tab.set_alpha(self.alpha)
+        self.ctx = ctx = csTabButtonCtx(sc_tab, self.w, self.h, self.brightness, self.color_on, self.color_off, self.font)
+        self.ctx.set_text(self.text)
+
+        self.tab_buttons = []
+        for y in range(0, 3 * self.hh, self.hh):
+            for x in range(0, 3 * self.ww, self.ww):
+                self.tab_buttons.append(csTabButton(ctx, x, y))
+
 
     def __init__(self):
         pg.init()
@@ -100,17 +157,17 @@ class csDNB:
         sc = self.sc = pg.display.set_mode((width, height), pg.RESIZABLE)
 
         self.indent = 8
-        self.resize()
 
-        # self.brightness = 128
-        self.brightness = 128*2-1
-        #self.alpha = 0x9f
+        self.brightness = 255
         self.alpha = 0x7f
         self.color_off = (0, 0, self.brightness)
         self.color_on = (0, self.brightness, 0)
         self.color_bt_wait = (self.brightness, self.brightness, self.brightness)
         self.color_bt_ok = (0, self.brightness, 0)
         self.color_bt_err = (self.brightness, 0, 0)
+
+        self.text = 'A'
+        self.resize()
 
         self.n = 2
         self.seq_a = []
@@ -138,30 +195,23 @@ class csDNB:
         self.i_step = 0
 
         self.i_on = 0
-        self.text = 'A'
         self.i_on_fx = 0
 
         self.is_text_buttons = True
 
         self.plasma = csPlasma(sc)
+        
+        self.text_surface = None
         rnd.seed()
         self.running = True
-
-    def rect_text(self, sc, c, x, y, w, h, tsc, tw, th):
-        '''
-        if c == self.color_on:
-            if not self.i_on_fx:
-                self.i_on_fx = 255
-            else:
-                if self.i_on_fx > 20:
-                    self.i_on_fx -= 20
-        
-        c = (self.i_on_fx, max(self.i_on_fx, self.brightness), self.i_on_fx)
-        '''
-
-        pg.draw.rect(sc, c, (x, y, w, h))
-        sc.blit(tsc, (x + (w - tw) // 2, y + (h - th) // 2))
     
+    def draw_tab_buttons(self):
+        i = 0
+        for b in self.tab_buttons:
+            b.run(i == self.i_on, self.is_text_buttons)
+            i += 1
+        self.sc.blit(self.sc_tab, (self.w, self.h))
+
     def run(self):
         self.timeout()
 
@@ -214,31 +264,13 @@ class csDNB:
                         self.is_a_released = True
 
             # Main Loop Code belongs here
-            i = 0
-            sc_tab = pg.Surface((self.w + 2 * self.ww, self.h + 2 * self.hh))
-            for y in range(0, 3 * self.hh, self.hh):
-                for x in range(0, 3 * self.ww, self.ww):
-                    if i == self.i_on:
-                        if self.is_text_buttons:
-                            self.rect_text(sc_tab, self.color_on, x, y, self.w, self.h, self.text_surface, self.text_w, self.text_h)
-                        else:
-                            pg.draw.rect(sc_tab, self.color_on, (x, y, self.w, self.h))
-                    else:
-                        pg.draw.rect(sc_tab, self.color_off, (x, y, self.w, self.h))
-
-                    i += 1
-
-            sc_tab.set_alpha(self.alpha)
-            self.sc.blit(sc_tab, (self.w, self.h))
+            self.draw_tab_buttons()
             
             if not self.is_a_clicked:
                 bt_a_color = self.color_bt_wait
             if not self.is_b_clicked:
                 bt_b_color = self.color_bt_wait
 
-            #self.pan_indent = self.indent * 2
-            #y_butt = self.height - self.h // 2 - self.pan_indent
-            #pan_top = y_butt - self.pan_indent
             y_butt = self.y_butt
             pan_top = self.pan_top
 
@@ -246,8 +278,8 @@ class csDNB:
             pg.draw.rect(psc, (0, 0, 0x30), (0, 0, self.width - 1, self.height - pan_top - 1))
             y_butt -= pan_top
             butt_h = self.height - pan_top - 2 * self.pan_indent
-            self.rect_text(psc, bt_b_color, self.w, y_butt, self.w, butt_h, self.text_b_surface, self.text_b_w, self.text_b_h)
-            self.rect_text(psc, bt_a_color, self.w + 2 * self.ww, y_butt, self.w, butt_h, self.text_a_surface, self.text_a_w, self.text_a_h)
+            csUtil.rect_text(psc, bt_b_color, self.w, y_butt, self.w, butt_h, self.text_b_surface, self.text_b_w, self.text_b_h)
+            csUtil.rect_text(psc, bt_a_color, self.w + 2 * self.ww, y_butt, self.w, butt_h, self.text_a_surface, self.text_a_w, self.text_a_h)
 
             text = f'{self.i_a_score}'
             c = self.i_a_score >= 0 and (0, self.brightness, 0) or (self.brightness, 0, self.brightness)
