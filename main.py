@@ -7,9 +7,10 @@ import pygame as pg
 import random as rnd
 from threading import Timer
 from plasma import csPlasma
+from water import csWaterButton
 
 class csUtil:
-    def rect_text(sc, c, x, y, w, h, tsc, tw, th):
+    def rect_text(sc, c, rect, tpar, br=0):
         '''
         if c == self.color_on:
             if not self.i_on_fx:
@@ -20,15 +21,19 @@ class csUtil:
         
         c = (self.i_on_fx, max(self.i_on_fx, self.brightness), self.i_on_fx)
         '''
-
-        pg.draw.rect(sc, c, (x, y, w, h))
-        sc.blit(tsc, (x + (w - tw) // 2, y + (h - th) // 2))
+        x, y, w, h = rect
+        pg.draw.rect(sc, c, rect, border_radius=br)
+        
+        if tpar is not None:
+            tsc, tw, th = tpar
+            sc.blit(tsc, (x + (w - tw) // 2, y + (h - th) // 2))
 
 class csTabButtonCtx:
     def __init__(self, sc, w, h, brightness, color_on, color_off, font):
         self.sc = sc
         self.w = w
         self.h = h
+        self.br = h//4
         #self.tsc = tsc
         #self.tw = tw
         #self.th = th
@@ -47,6 +52,10 @@ class csTabButton:
         self.ctx = ctx
         self.x = x
         self.y = y
+        self.butt = csWaterButton(self.ctx.sc, x + self.ctx.w//2, y + self.ctx.h//2, self.ctx.w, self.ctx.h, self.ctx.br)
+        #for i in range(4):
+        #    self.butt.hit_corner(i, 0.5)
+        self.butt.hit_corner(rnd.randint(0, 3), 0.5)
     
     def run(self, is_on, is_text):
         sc = self.ctx.sc
@@ -59,14 +68,22 @@ class csTabButton:
         th = self.ctx.th
         color_on = self.ctx.color_on
         color_off = self.ctx.color_off
+        br = self.ctx.br
         if is_on:
+            c = color_on
             if is_text:
-                csUtil.rect_text(sc, color_on, x, y, w, h, tsc, tw, th)
+                t = (tsc, tw, th)
             else:
-                pg.draw.rect(sc, color_on, (x, y, w, h))
+                t = None
         else:
-            pg.draw.rect(sc, color_off, (x, y, w, h))
-
+            c = color_off
+            t = None
+        
+        #csUtil.rect_text(sc, c, (x, y, w, h), t, br)
+        self.butt.run(c)
+        if t is not None:
+            tsc, tw, th = t
+            sc.blit(tsc, (x + (w - tw) // 2, y + (h - th) // 2))
 
 class csDNB:
     def timeout(self):
@@ -153,7 +170,9 @@ class csDNB:
 
         self.fps = 60
         self.fpsClock = pg.time.Clock()
-        width, height = 1024, 768
+        #width, height = 1024, 768
+        k = 3
+        width, height = 1024//k, 768//k
         sc = self.sc = pg.display.set_mode((width, height), pg.RESIZABLE)
 
         self.indent = 8
@@ -207,6 +226,7 @@ class csDNB:
     
     def draw_tab_buttons(self):
         i = 0
+        self.sc_tab.fill((0, 0, 0))
         for b in self.tab_buttons:
             b.run(i == self.i_on, self.is_text_buttons)
             i += 1
@@ -278,8 +298,8 @@ class csDNB:
             pg.draw.rect(psc, (0, 0, 0x30), (0, 0, self.width - 1, self.height - pan_top - 1))
             y_butt -= pan_top
             butt_h = self.height - pan_top - 2 * self.pan_indent
-            csUtil.rect_text(psc, bt_b_color, self.w, y_butt, self.w, butt_h, self.text_b_surface, self.text_b_w, self.text_b_h)
-            csUtil.rect_text(psc, bt_a_color, self.w + 2 * self.ww, y_butt, self.w, butt_h, self.text_a_surface, self.text_a_w, self.text_a_h)
+            csUtil.rect_text(psc, bt_b_color, (self.w, y_butt, self.w, butt_h), (self.text_b_surface, self.text_b_w, self.text_b_h))
+            csUtil.rect_text(psc, bt_a_color, (self.w + 2 * self.ww, y_butt, self.w, butt_h), (self.text_a_surface, self.text_a_w, self.text_a_h))
 
             text = f'{self.i_a_score}'
             c = self.i_a_score >= 0 and (0, self.brightness, 0) or (self.brightness, 0, self.brightness)

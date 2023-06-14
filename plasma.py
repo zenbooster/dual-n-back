@@ -55,7 +55,7 @@ class csPlasma:
         surf_xy = pg.transform.flip(surf, True, True)
         m_scale = M * scale
         for j in range(1 + self.sc.get_height() // m_scale):
-            for i in range(self.sc.get_width() // m_scale):
+            for i in range(1 + self.sc.get_width() // m_scale):
                 if j & 1:
                     src = (i & 1) and surf_xy or surf_y
                 else:
