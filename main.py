@@ -143,7 +143,8 @@ class csDNB:
         self.height = height = self.sc.get_height()
 
         pan_indent = self.pan_indent = self.indent * 2
-        pan_top = self.pan_top = height - height // 10 - 2*pan_indent
+        self.pan_height = pan_height = height // 10 + 2*pan_indent
+        pan_top = self.pan_top = height - pan_height
         self.y_butt = pan_top + pan_indent
 
         self.w = width // 5
@@ -198,10 +199,10 @@ class csDNB:
         self.j = pg.joystick.Joystick(0)
         self.j.init()
 
-        text = '+' # chr(0x25ac)
+        text = 'ПОЗ' # chr(0x25ac)
         self.text_a_surface = self.font.render(text, False, (self.brightness, 0, 0))
         self.text_a_w, self.text_a_h = self.font.size(text)
-        text = 'A'
+        text = 'АБВ'
         self.text_b_surface = self.font.render(text, False, (self.brightness, 0, 0))
         self.text_b_w, self.text_b_h = self.font.size(text)
 
@@ -230,7 +231,9 @@ class csDNB:
         for b in self.tab_buttons:
             b.run(i == self.i_on, self.is_text_buttons)
             i += 1
-        self.sc.blit(self.sc_tab, (self.w, self.h))
+        #self.sc.blit(self.sc_tab, (self.w, self.h))
+        sc_tab = self.sc_tab
+        self.sc.blit(sc_tab, ((self.width - sc_tab.get_width()) // 2, (self.height - sc_tab.get_height() - self.pan_height) // 2))
 
     def run(self):
         self.timeout()
@@ -298,8 +301,11 @@ class csDNB:
             pg.draw.rect(psc, (0, 0, 0x30), (0, 0, self.width - 1, self.height - pan_top - 1))
             y_butt -= pan_top
             butt_h = self.height - pan_top - 2 * self.pan_indent
-            csUtil.rect_text(psc, bt_b_color, (self.w, y_butt, self.w, butt_h), (self.text_b_surface, self.text_b_w, self.text_b_h))
-            csUtil.rect_text(psc, bt_a_color, (self.w + 2 * self.ww, y_butt, self.w, butt_h), (self.text_a_surface, self.text_a_w, self.text_a_h))
+            w_ofs = (self.width - self.sc_tab.get_width()) // 2
+            #csUtil.rect_text(psc, bt_b_color, (self.w, y_butt, self.w, butt_h), (self.text_b_surface, self.text_b_w, self.text_b_h))
+            #csUtil.rect_text(psc, bt_a_color, (self.w + 2 * self.ww, y_butt, self.w, butt_h), (self.text_a_surface, self.text_a_w, self.text_a_h))
+            csUtil.rect_text(psc, bt_b_color, (w_ofs, y_butt, self.w, butt_h), (self.text_b_surface, self.text_b_w, self.text_b_h))
+            csUtil.rect_text(psc, bt_a_color, (w_ofs + 2 * self.ww, y_butt, self.w, butt_h), (self.text_a_surface, self.text_a_w, self.text_a_h))
 
             text = f'{self.i_a_score}'
             c = self.i_a_score >= 0 and (0, self.brightness, 0) or (self.brightness, 0, self.brightness)
