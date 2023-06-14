@@ -52,7 +52,7 @@ class csWater:
         springs[i].nx = int(rvec[0])
         springs[i].ny = int(rvec[1])
 
-    def __init__(self, sc, cx, cy, dampening=0.001, tension=0.1):
+    def __init__(self, sc, cx, cy, dampening=0.001, tension=0.5):
         self.cx = cx
         self.cy = cy
         self.sc = sc
@@ -71,7 +71,8 @@ class csWater:
             springs[i].update()
 
         # распространить волну:
-        spread = 0.1
+        #spread = 0.1
+        spread = 0.85
         for i in range(cnt):
             i_prev = (i - 1) % cnt
             i_next = (i + 1) % cnt
@@ -166,6 +167,9 @@ class csWaterButton:
     def run(self, c):
         self.water.run(c)
     
+    def get_water_length(self):
+        return len(self.water.springs)
+    
     def hit_corner(self, i, v=1):
         bw = self.bw
         bh = self.bh
@@ -183,7 +187,25 @@ class csWaterButton:
         water = self.water
         for i in range(j, j + br):
             water.splash(i, v)
+    
+    def hit(self, i, w, v):
+        def _hit(i, j, v):
+            cnt = j - i
+            m = cnt / 2 - i
+            for t in range(i, j):
+                #k = m - abs(t - i - m)
+                k = (t - i) / cnt
+                k = 0.5 - abs(k - 0.5)
+                water.splash(t, v * k)
 
+        water = self.water
+        cnt = self.get_water_length()
+        j = (i + w) % cnt
+        if i > j:
+            _hit(i, cnt - 1, v)
+            _hit(0, j, v)
+        else:
+            _hit(i, j, v)
 '''
 pg.init()
 

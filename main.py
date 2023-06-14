@@ -43,7 +43,9 @@ class csTabButtonCtx:
         self.font = font
     
     def set_text(self, text):
-        self.tsc = self.font.render(text, False, (self.brightness, 0, 0))
+        #c = (self.brightness, 0, 0)
+        c = (self.brightness, self.brightness, 0)
+        self.tsc = self.font.render(text, False, c)
         self.tw, self.th = self.font.size(text)
 
 
@@ -54,8 +56,9 @@ class csTabButton:
         self.y = y
         self.butt = csWaterButton(self.ctx.sc, x + self.ctx.w//2, y + self.ctx.h//2, self.ctx.w, self.ctx.h, self.ctx.br)
         #for i in range(4):
-        #    self.butt.hit_corner(i, 0.5)
-        self.butt.hit_corner(rnd.randint(0, 3), 0.5)
+        #    self.butt.hit_corner(i, 3*0.5)
+        #self.butt.hit_corner(rnd.randint(0, 3), 2)
+        self.butt.hit(rnd.randint(0, self.butt.get_water_length() - 1), 100, 8)
     
     def run(self, is_on, is_text):
         sc = self.ctx.sc
@@ -142,7 +145,7 @@ class csDNB:
         self.width = width = self.sc.get_width()
         self.height = height = self.sc.get_height()
 
-        pan_indent = self.pan_indent = self.indent * 2
+        pan_indent = self.pan_indent = self.indent
         self.pan_height = pan_height = height // 10 + 2*pan_indent
         pan_top = self.pan_top = height - pan_height
         self.y_butt = pan_top + pan_indent
@@ -155,8 +158,9 @@ class csDNB:
         pg.font.init()
         self.font = pg.font.SysFont('arial', self.h // 2)
         
-        self.sc_tab = sc_tab = pg.Surface((self.w + 2 * self.ww, self.h + 2 * self.hh))
-        sc_tab.set_alpha(self.alpha)
+        self.sc_tab = sc_tab = pg.Surface((self.w + 2 * self.ww, self.h + 2 * self.hh), pg.SRCALPHA)
+        #sc_tab.fill((0, 0, 0, 255))
+        #sc_tab.set_alpha(self.alpha)
         self.ctx = ctx = csTabButtonCtx(sc_tab, self.w, self.h, self.brightness, self.color_on, self.color_off, self.font)
         self.ctx.set_text(self.text)
 
@@ -172,16 +176,17 @@ class csDNB:
         self.fps = 60
         self.fpsClock = pg.time.Clock()
         #width, height = 1024, 768
-        k = 3
+        k = 1
         width, height = 1024//k, 768//k
         sc = self.sc = pg.display.set_mode((width, height), pg.RESIZABLE)
 
-        self.indent = 8
+        #self.indent = 8
+        self.indent = 32
 
         self.brightness = 255
         self.alpha = 0x7f
-        self.color_off = (0, 0, self.brightness)
-        self.color_on = (0, self.brightness, 0)
+        self.color_off = (0, 0, self.brightness, 127)
+        self.color_on = (0, self.brightness, 0, 127)
         self.color_bt_wait = (self.brightness, self.brightness, self.brightness)
         self.color_bt_ok = (0, self.brightness, 0)
         self.color_bt_err = (self.brightness, 0, 0)
@@ -227,7 +232,7 @@ class csDNB:
     
     def draw_tab_buttons(self):
         i = 0
-        self.sc_tab.fill((0, 0, 0))
+        self.sc_tab.fill((0, 0, 0, 0))
         for b in self.tab_buttons:
             b.run(i == self.i_on, self.is_text_buttons)
             i += 1
@@ -309,15 +314,16 @@ class csDNB:
 
             text = f'{self.i_a_score}'
             c = self.i_a_score >= 0 and (0, self.brightness, 0) or (self.brightness, 0, self.brightness)
-            self.text_a_score_sc = self.font.render(text, False, c)
+            self.a_score_tsc = self.font.render(text, False, c)
             self.text_a_score_w, self.text_a_score_h = self.font.size(text)
-            psc.blit(self.text_a_score_sc, (self.width - 1 - self.text_a_score_w - 10, y_butt + (butt_h - self.text_a_h) // 2))
+            psc.blit(self.a_score_tsc, (self.width - 1 - self.text_a_score_w - 10, y_butt + (butt_h - self.text_a_h) // 2))
 
             text = f'{self.i_b_score}'
             c = self.i_b_score >= 0 and (0, self.brightness, 0) or (self.brightness, 0, self.brightness)
-            self.text_b_score_sc = self.font.render(text, False, c)
+            self.b_score_tsc = self.font.render(text, False, c)
             self.text_b_score_w, self.text_b_score_h = self.font.size(text)
-            psc.blit(self.text_b_score_sc, (10, y_butt + (butt_h - self.text_a_h) // 2))
+            #csUtil.rect_text(psc, bt_b_color, (0, 0, (self.pan_height * 2) // 3, self.pan_height), (self.b_score_tsc, self.text_b_score_w, self.text_b_score_h))
+            psc.blit(self.b_score_tsc, (10, y_butt + (butt_h - self.text_a_h) // 2))
 
             psc.set_alpha(self.alpha)
             self.sc.blit(psc, (0, pan_top))
