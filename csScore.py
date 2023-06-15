@@ -5,6 +5,7 @@ from csText import csText
 import threading as th
 
 class csScore:
+    '''
     def _timer_flash(self):
         with self.lck_draw:
             self.i_tx = (self.i_tx + 1) % 2
@@ -18,6 +19,7 @@ class csScore:
         else:
             with self.lck_draw:
                 self.i_tx = 0
+    '''
 
     def _timer_term(self):
         with self.lck_timer:
@@ -30,8 +32,8 @@ class csScore:
         self.i = self.old_i = 0
         self.lck_draw = th.Lock()
         self.lck_timer = th.Lock()
-        self.t_sec = 0.05
-        self.tt_sec = 0.5
+        #self.t_sec = 0.1 # 0.05
+        self.tt_sec = 1 # 0.5
         self.is_flash = False
     
     def resize(self, sc, font):
@@ -65,8 +67,8 @@ class csScore:
                 self.is_flash = True
                 self.tt = th.Timer(self.tt_sec, self._timer_term)
                 self.tt.start()
-                self.t = th.Timer(self.t_sec, self._timer_flash)
-                self.t.start()
+                #self.t = th.Timer(self.t_sec, self._timer_flash)
+                #self.t.start()
 
             self.old_i = self.i
         else:
@@ -86,6 +88,10 @@ class csScore:
         self.update()
 
     def draw(self, rc):
-        #print(f'HIT.1: self={self}; rc={rc}')
+        if self.is_flash:
+            self.i_tx = (self.i_tx + 1) % 2
+        else:
+            self.i_tx = 0
+
         with self.lck_draw:
             self.a_tx[self.i_tx].draw(rc)

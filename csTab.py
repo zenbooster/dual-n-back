@@ -4,6 +4,7 @@
 import pygame as pg
 from csTabButtonCtx import csTabButtonCtx
 from csTabButton import csTabButton
+import threading as th
 
 class csTab:
     def __init__(self, sc, brightness):
@@ -12,6 +13,7 @@ class csTab:
         self.color_off = (0, 0, self.brightness, 127)
         self.color_on = (0, self.brightness, 0, 127)
         self.text = 'A'
+        self.lock = th.Lock()
 
     def resize(self, font, wk_height, indent, bw, bh):
         self.width = width = self.sc.get_width()
@@ -36,15 +38,22 @@ class csTab:
     def get_text(self):
         return self.text
 
-    def set_text(self, text):
-        self.ctx.set_text(text)
+    #def set_text(self, text):
+    #    self.ctx.set_text(text)
+    def set(self, i_on, text):
+        with self.lock:
+            self.i_on = i_on
+            self.ctx.set_text(text)
 
-    def draw(self, i_on):
+    #def draw(self, i_on):
+    def draw(self):
         i = 0
         self.sc_tab.fill((0, 0, 0, 0))
-        for b in self.tab_buttons:
-            b.run(i == i_on)
-            i += 1
-        sc_tab = self.sc_tab
-        #self.sc.blit(sc_tab, ((self.width - sc_tab.get_width()) // 2, (self.height - sc_tab.get_height() - self.status_pan.get_height()) // 2))
-        self.sc.blit(sc_tab, ((self.width - sc_tab.get_width()) // 2, (self.height - sc_tab.get_height()) // 2))
+
+        with self.lock:
+            for b in self.tab_buttons:
+                b.run(i == self.i_on)
+                i += 1
+            sc_tab = self.sc_tab
+            #self.sc.blit(sc_tab, ((self.width - sc_tab.get_width()) // 2, (self.height - sc_tab.get_height() - self.status_pan.get_height()) // 2))
+            self.sc.blit(sc_tab, ((self.width - sc_tab.get_width()) // 2, (self.height - sc_tab.get_height()) // 2))

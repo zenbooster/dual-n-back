@@ -68,8 +68,8 @@ class csStatusPan:
         ####
 
         w_ofs = (sc_w - tab_w) // 2
-        csUtil.rect_text(psc, ca, (w_ofs, y_butt, self.w, butt_h), (self.text_b_surface, self.text_b_w, self.text_b_h))
-        csUtil.rect_text(psc, cb, (w_ofs + 2 * self.ww, y_butt, self.w, butt_h), (self.text_a_surface, self.text_a_w, self.text_a_h))
+        csUtil.rect_text(psc, cb, (w_ofs, y_butt, self.w, butt_h), (self.text_b_surface, self.text_b_w, self.text_b_h))
+        csUtil.rect_text(psc, ca, (w_ofs + 2 * self.ww, y_butt, self.w, butt_h), (self.text_a_surface, self.text_a_w, self.text_a_h))
 
         self.score_a.draw((sc_w - 1 - self.score_a.nr_tx.w - 10, y_butt + (butt_h - self.text_a_h) // 2))
         self.score_b.draw((10, y_butt + (butt_h - self.text_a_h) // 2))

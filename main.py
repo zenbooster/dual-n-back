@@ -54,7 +54,8 @@ class csDNB:
             self.seq_a.append(self.i_on)
             self.seq_b.append(text)
             
-            self.tab.set_text(text)
+            #self.tab.set_text(text)
+            self.tab.set(i_on, text)
 
             self.i_step += 1
 
@@ -179,7 +180,8 @@ class csDNB:
                         self.is_a_released = True
 
             # Main Loop Code belongs here
-            self.tab.draw(self.i_on)
+            #self.tab.draw(self.i_on)
+            self.tab.draw()
             
             if not self.is_a_clicked:
                 bt_a_color = self.color_bt_wait
