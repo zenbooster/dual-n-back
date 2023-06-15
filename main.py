@@ -312,18 +312,26 @@ class csDNB:
             csUtil.rect_text(psc, bt_b_color, (w_ofs, y_butt, self.w, butt_h), (self.text_b_surface, self.text_b_w, self.text_b_h))
             csUtil.rect_text(psc, bt_a_color, (w_ofs + 2 * self.ww, y_butt, self.w, butt_h), (self.text_a_surface, self.text_a_w, self.text_a_h))
 
-            text = f'{self.i_a_score}'
-            c = self.i_a_score >= 0 and (0, self.brightness, 0) or (self.brightness, 0, self.brightness)
-            self.a_score_tsc = self.font.render(text, False, c)
-            self.text_a_score_w, self.text_a_score_h = self.font.size(text)
-            psc.blit(self.a_score_tsc, (self.width - 1 - self.text_a_score_w - 10, y_butt + (butt_h - self.text_a_h) // 2))
 
-            text = f'{self.i_b_score}'
+            class csText:
+                def __init__(self, font, text, color):
+                    self.font = font
+                    self.text = text
+                    self.color = color
+                    self.tsc = self.font.render(text, False, color)
+                    self.w, self.h = self.font.size(text)
+                
+                def draw(self, sc, rc):
+                    sc.blit(self.tsc, rc)
+
+
+            c = self.i_a_score >= 0 and (0, self.brightness, 0) or (self.brightness, 0, self.brightness)
+            tx_score_a = csText(self.font, f'{self.i_a_score}', c)
+            tx_score_a.draw(psc, (self.width - 1 - tx_score_a.w - 10, y_butt + (butt_h - self.text_a_h) // 2))
+
             c = self.i_b_score >= 0 and (0, self.brightness, 0) or (self.brightness, 0, self.brightness)
-            self.b_score_tsc = self.font.render(text, False, c)
-            self.text_b_score_w, self.text_b_score_h = self.font.size(text)
-            #csUtil.rect_text(psc, bt_b_color, (0, 0, (self.pan_height * 2) // 3, self.pan_height), (self.b_score_tsc, self.text_b_score_w, self.text_b_score_h))
-            psc.blit(self.b_score_tsc, (10, y_butt + (butt_h - self.text_a_h) // 2))
+            tx_score_b = csText(self.font, f'{self.i_b_score}', c)
+            tx_score_b.draw(psc, (10, y_butt + (butt_h - self.text_a_h) // 2))
 
             psc.set_alpha(self.alpha)
             self.sc.blit(psc, (0, pan_top))
