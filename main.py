@@ -76,8 +76,13 @@ class csDNB:
         self.font_big = font_big = pg.font.SysFont('arial', (height - height // 10 + 2 * indent) // 5)
         self.font_big.bold = True
 
-        #self.sc_pause = pg.Surface
-        self.tx_pause = csText(self.sc, font_big, "PAUSE", (self.brightness, 0, 0))
+        s_pause = "PAUSE"
+        #self.sc_pause = pg.Surface(self.font_big.size(s_pause), pg.SRCALPHA)
+        #self.sc_pause.fill((0, 0, 0, 0))
+        #self.tx_pause = csText(self.sc_pause, font_big, s_pause, (self.brightness, 0, 0, 32))
+        self.tx_pause = csText(self.sc, font_big, s_pause, (self.brightness, 0, 0))
+        self.tx_pause.tsc.set_alpha(0x9f)
+        #self.tx_pause.draw((0, 0))
 
         #tab = self.tab
         #tab.resize(font, self.indent, bw, bh)
@@ -218,6 +223,8 @@ class csDNB:
 
             if self.is_paused:
                 self.tx_pause.draw(((self.width - self.tx_pause.w) // 2, (self.height - self.tx_pause.h - self.status_pan.get_height()) // 2))
+                #sc_pause = self.sc_pause
+                #self.sc.blit(sc_pause, ((self.width - sc_pause.get_width()) // 2, (self.height - sc_pause.get_height() - self.status_pan.get_height()) // 2))
 
             pg.display.flip()
             self.fpsClock.tick(self.fps)
