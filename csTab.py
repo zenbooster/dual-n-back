@@ -18,9 +18,6 @@ class csTab:
     def resize(self, font, wk_height, indent, bw, bh):
         self.width = width = self.sc.get_width()
         self.height = wk_height
-        #self.height = height = self.sc.get_height()
-        #self.w = width // 5
-        #self.h = status_pan.get_top() // 5
         self.w = bw
         self.h = bh
         self.ww = self.w + indent

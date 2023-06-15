@@ -10,10 +10,11 @@ from plasma import csPlasma
 from csTab import csTab
 from csStatusPan import csStatusPan
 from csUtil import csUtil
+from csText import csText
 
 class csDNB:
     def timeout(self):
-        if self.running:
+        if self.running and not self.is_paused:
             if self.i_step > self.n:
                 if self.seq_a[0] == self.seq_a[self.n]:
                     if self.is_a_clicked:
@@ -72,6 +73,11 @@ class csDNB:
         height = self.height
         indent = self.indent
         self.font = font = pg.font.SysFont('arial', (height - height // 10 + 2 * indent) // 10)
+        self.font_big = font_big = pg.font.SysFont('arial', (height - height // 10 + 2 * indent) // 5)
+        self.font_big.bold = True
+
+        #self.sc_pause = pg.Surface
+        self.tx_pause = csText(self.sc, font_big, "PAUSE", (self.brightness, 0, 0))
 
         #tab = self.tab
         #tab.resize(font, self.indent, bw, bh)
@@ -126,10 +132,9 @@ class csDNB:
         
         rnd.seed()
         self.running = True
+        self.is_paused = False
+        self.is_start_released = True
     
-    def draw_tab_buttons(self):
-        self.tab.draw(self.i_on)
-
     def run(self):
         self.timeout()
 
@@ -146,38 +151,59 @@ class csDNB:
                     self.t.cancel()
                     pg.quit()
                     sys.exit()
-                elif event.type == pg.JOYBUTTONDOWN:
-                    #print(f'event.button = {event.button}')
-                    if event.button == 9: # start
-                        self.status_pan.score_a.reset()
-                        self.status_pan.score_b.reset()
-                        self.i_step = 1
-                        self.seq_a = [self.seq_a[-1]]
-                        self.seq_b = [self.seq_b[-1]]
+                else:
+                    if event.type == pg.JOYBUTTONDOWN:
+                        #print(f'event.button = {event.button}')
+                        if self.is_start_released and (event.button == 9): # start
+                            if self.is_paused:
+                                self.is_paused = False
+                                self.timeout()
+                            else:
+                                self.is_paused = True
+                                self.t.cancel()
 
-                    elif not self.is_b_released and (event.button == 4):
-                        self.is_b_clicked = True
-                        if len(self.seq_b) > self.n:
-                            if self.seq_b[0] == self.seq_b[self.n]:
-                                bt_b_color = self.color_bt_ok
-                                self.status_pan.score_b.inc()
-                            else:
-                                bt_b_color = self.color_bt_err
-                                self.status_pan.score_b.dec()
-                    elif not self.is_a_released and (event.button == 5):
-                        self.is_a_clicked = True
-                        if len(self.seq_a) > self.n:
-                            if self.seq_a[0] == self.seq_a[self.n]:
-                                bt_a_color = self.color_bt_ok
-                                self.status_pan.score_a.inc()
-                            else:
-                                bt_a_color = self.color_bt_err
-                                self.status_pan.score_a.dec()
-                elif event.type == pg.JOYBUTTONUP:
-                    if event.button == 4:
-                        self.is_b_released = True
-                    elif event.button == 5:
-                        self.is_a_released = True
+                            self.is_start_released = False
+                            continue
+
+                    elif event.type == pg.JOYBUTTONUP:
+                        if event.button == 9:
+                            self.is_start_released = True
+
+                    if self.is_paused:
+                        pass
+                    else:
+                        if event.type == pg.JOYBUTTONDOWN:
+                            #print(f'event.button = {event.button}')
+                            if event.button == 1: # A
+                                self.status_pan.score_a.reset()
+                                self.status_pan.score_b.reset()
+                                self.i_step = 1
+                                self.seq_a = [self.seq_a[-1]]
+                                self.seq_b = [self.seq_b[-1]]
+
+                            elif not self.is_b_released and (event.button == 4):
+                                self.is_b_clicked = True
+                                if len(self.seq_b) > self.n:
+                                    if self.seq_b[0] == self.seq_b[self.n]:
+                                        bt_b_color = self.color_bt_ok
+                                        self.status_pan.score_b.inc()
+                                    else:
+                                        bt_b_color = self.color_bt_err
+                                        self.status_pan.score_b.dec()
+                            elif not self.is_a_released and (event.button == 5):
+                                self.is_a_clicked = True
+                                if len(self.seq_a) > self.n:
+                                    if self.seq_a[0] == self.seq_a[self.n]:
+                                        bt_a_color = self.color_bt_ok
+                                        self.status_pan.score_a.inc()
+                                    else:
+                                        bt_a_color = self.color_bt_err
+                                        self.status_pan.score_a.dec()
+                        elif event.type == pg.JOYBUTTONUP:
+                            if event.button == 4:
+                                self.is_b_released = True
+                            elif event.button == 5:
+                                self.is_a_released = True
 
             # Main Loop Code belongs here
             #self.tab.draw(self.i_on)
@@ -189,6 +215,9 @@ class csDNB:
                 bt_b_color = self.color_bt_wait
 
             self.status_pan.draw(bt_a_color, bt_b_color)
+
+            if self.is_paused:
+                self.tx_pause.draw(((self.width - self.tx_pause.w) // 2, (self.height - self.tx_pause.h - self.status_pan.get_height()) // 2))
 
             pg.display.flip()
             self.fpsClock.tick(self.fps)
