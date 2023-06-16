@@ -15,13 +15,18 @@ from csText import csText
 class csDNB:
     def timeout(self):
         if self.running and not self.is_paused:
-            if self.i_step > self.n:
-                if self.seq_a[0] == self.seq_a[self.n]:
+            seq_a = self.seq_a
+            seq_a_len = len(seq_a)
+            seq_b = self.seq_b
+            seq_b_len = len(seq_b)
+            if seq_a_len > self.n:
+                if seq_a[0] == seq_a[self.n]:
                     if self.is_a_clicked:
                         pass
                     else:
                         self.status_pan.score_a.dec()
-                if self.seq_b[0] == self.seq_b[self.n]:
+            if seq_b_len > self.n:
+                if seq_b[0] == seq_b[self.n]:
                     if self.is_b_clicked:
                         pass
                     else:
@@ -46,10 +51,10 @@ class csDNB:
                     self.text = text
                     break
 
-            if len(self.seq_a) > self.n:
+            if seq_a_len > self.n:
                 self.seq_a.pop(0)
 
-            if len(self.seq_b) > self.n:
+            if seq_b_len > self.n:
                 self.seq_b.pop(0)
 
             self.seq_a.append(self.i_on)
@@ -77,15 +82,9 @@ class csDNB:
         self.font_big.bold = True
 
         s_pause = "PAUSE"
-        #self.sc_pause = pg.Surface(self.font_big.size(s_pause), pg.SRCALPHA)
-        #self.sc_pause.fill((0, 0, 0, 0))
-        #self.tx_pause = csText(self.sc_pause, font_big, s_pause, (self.brightness, 0, 0, 32))
         self.tx_pause = csText(self.sc, font_big, s_pause, (self.brightness, 0, 0))
         self.tx_pause.tsc.set_alpha(0x9f)
-        #self.tx_pause.draw((0, 0))
 
-        #tab = self.tab
-        #tab.resize(font, self.indent, bw, bh)
         status_pan = self.status_pan
         status_pan.resize(font, self.indent)
 
@@ -161,8 +160,16 @@ class csDNB:
                         #print(f'event.button = {event.button}')
                         if self.is_start_released and (event.button == 9): # start
                             if self.is_paused:
+                                n = self.n
+                                if self.i_step > n:
+                                    self.i_step -= n
+
+                                self.seq_a = [self.seq_a[-1]]
+                                self.seq_b = [self.seq_b[-1]]
+
                                 self.is_paused = False
-                                self.timeout()
+                                self.t = Timer(2, self.timeout)
+                                self.t.start()
                             else:
                                 self.is_paused = True
                                 self.t.cancel()
@@ -211,7 +218,6 @@ class csDNB:
                                 self.is_a_released = True
 
             # Main Loop Code belongs here
-            #self.tab.draw(self.i_on)
             self.tab.draw()
             
             if not self.is_a_clicked:
@@ -223,8 +229,6 @@ class csDNB:
 
             if self.is_paused:
                 self.tx_pause.draw(((self.width - self.tx_pause.w) // 2, (self.height - self.tx_pause.h - self.status_pan.get_height()) // 2))
-                #sc_pause = self.sc_pause
-                #self.sc.blit(sc_pause, ((self.width - sc_pause.get_width()) // 2, (self.height - sc_pause.get_height() - self.status_pan.get_height()) // 2))
 
             pg.display.flip()
             self.fpsClock.tick(self.fps)
