@@ -11,8 +11,11 @@ class csTabButtonCtx:
         self.color_on = color_on
         self.color_off = color_off
         self.font = font
+        self.text = None
     
     def set_text(self, text):
-        c = (self.brightness, self.brightness, 0)
-        self.tsc = self.font.render(text, False, c)
-        self.tw, self.th = self.font.size(text)
+        if text is not None:
+            self.text = text
+            c = (self.brightness, self.brightness, 0)
+            self.tsc = self.font.render(text, False, c)
+            self.tw, self.th = self.font.size(text)

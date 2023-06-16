@@ -12,7 +12,8 @@ class csTab:
         self.brightness = brightness
         self.color_off = (0, 0, self.brightness, 127)
         self.color_on = (0, self.brightness, 0, 127)
-        self.text = 'A'
+        #self.text = 'A'
+        self.ctx = None
         self.lock = th.Lock()
 
     def resize(self, font, wk_height, indent, bw, bh):
@@ -24,8 +25,9 @@ class csTab:
         self.hh = self.h + indent
 
         self.sc_tab = sc_tab = pg.Surface((self.w + 2 * self.ww, self.h + 2 * self.hh), pg.SRCALPHA)
+        text = (self.ctx is not None) and self.ctx.text or None
         self.ctx = ctx = csTabButtonCtx(sc_tab, self.w, self.h, self.brightness, self.color_on, self.color_off, font)
-        self.ctx.set_text(self.text)
+        self.ctx.set_text(text)
 
         self.tab_buttons = []
         for y in range(0, 3 * self.hh, self.hh):
@@ -33,7 +35,7 @@ class csTab:
                 self.tab_buttons.append(csTabButton(ctx, x, y))
 
     def get_text(self):
-        return self.text
+        return self.ctx.text
 
     #def set_text(self, text):
     #    self.ctx.set_text(text)
