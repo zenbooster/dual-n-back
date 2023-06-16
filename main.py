@@ -81,7 +81,7 @@ class csDNB:
         self.font_big = font_big = pg.font.SysFont('arial', (height - height // 10 + 2 * indent) // 5)
         self.font_big.bold = True
 
-        s_pause = "PAUSE"
+        s_pause = "ПАУЗА"
         self.tx_pause = csText(self.sc, font_big, s_pause, (self.brightness, 0, 0))
         self.tx_pause.tsc.set_alpha(0x9f)
 
@@ -161,8 +161,8 @@ class csDNB:
                         if self.is_start_released and (event.button == 9): # start
                             if self.is_paused:
                                 n = self.n
-                                if self.i_step > n:
-                                    self.i_step -= n
+                                #if self.i_step > n:
+                                #    self.i_step -= n
 
                                 self.seq_a = [self.seq_a[-1]]
                                 self.seq_b = [self.seq_b[-1]]
