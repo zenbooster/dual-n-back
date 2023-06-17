@@ -6,6 +6,11 @@
 Кнопка "start" - пауза.
 Кнопка "A" - сброс очков (пока не реализовано игровое меню).
 
+&nbsp;
+<img align="left" src="https://repository-images.githubusercontent.com/652807564/fb3c5aa6-fa07-4675-b004-0a2009a645bf">
+
+&nbsp;
+
 В планах:
 - Сделать игровое меню.
 - Сделать конфигуратор ввода.
