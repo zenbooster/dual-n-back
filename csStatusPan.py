@@ -6,9 +6,8 @@ from csScore import csScore
 from csUtil import csUtil
 
 class csStatusPan:
-    def __init__(self, sc, brightness, alpha):
-        self.sc = sc
-
+    #def __init__(self, sc, brightness, alpha):
+    def __init__(self, brightness, alpha):
         self.alpha = alpha
         self.brightness = brightness
 
@@ -19,7 +18,8 @@ class csStatusPan:
         self.score_a = csScore(ps_color, ng_color, fl_color)
         self.score_b = csScore(ps_color, ng_color, fl_color)
 
-    def resize(self, font, indent):
+    def resize(self, sc, font, indent):
+        self.sc = sc
         self.indent = indent
         sc = self.sc
         self.sc_w = w = sc.get_width()
@@ -27,7 +27,7 @@ class csStatusPan:
         self.height = height = h // 10 + 2 * indent
         self.top = top = h - height
         self.y_butt = top + indent
-        self.psc = psc = pg.Surface((w, h - top))
+        self.psc = psc = pg.Surface((w, h - top), pg.SRCALPHA)
 
         brightness = self.brightness
         text = 'ПОЗ'

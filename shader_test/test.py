@@ -4,14 +4,14 @@ import pygame_shaders
 
 pygame.init()
 
-w = 200
-h = 200
+w = 1000
+h = 1000
 screen = pygame.display.set_mode((w, h), pygame.OPENGL | pygame.DOUBLEBUF | pygame.HWSURFACE)
 display = pygame.Surface((w, h))
 display.set_colorkey((0, 0, 0))
 
-shader = pygame_shaders.Shader((w, h), (w, h), (0, 0), "shaders/vertex.txt", "shaders/fragment.txt", display)
-shader_1 = pygame_shaders.Shader((w, h), (w, h), (0, 0), "shaders/vertex_1.txt", "shaders/fragment_1.txt", display)
+shd_plasma = pygame_shaders.Shader((w, h), (w, h), (0, 0), "shaders/v-plasma.txt", "shaders/f-plasma.txt", display)
+shd_blit = pygame_shaders.Shader((w, h), (w, h), (0, 0), "shaders/v-blit.txt", "shaders/f-blit.txt", display)
 
 clock = pygame.time.Clock()
 
@@ -25,11 +25,11 @@ while True:
             pygame.quit()
             sys.exit()
             
-    pygame.draw.rect(display, (0, 255, 0), (20, 20, 160, 160)) #Draw a red rectangle to the display at (20, 20)
-    shader.send('iResolution', [1, 1])
-    shader.send("iTime", [dt])
-    shader.render(display) #Render the display onto the OpenGL display with the shaders!
-    shader_1.render(display)
-    dt += 0.1
+    #pygame.draw.rect(display, (0, 255, 0), (20, 20, 160, 160)) #Draw a red rectangle to the display at (20, 20)
+    shd_plasma.send('iResolution', [1, 1])
+    shd_plasma.send("iTime", [dt])
+    shd_plasma.render(display) #Render the display onto the OpenGL display with the shaders!
+    shd_blit.render(display)
+    dt += 0.01
     pygame.display.flip()
     clock.tick(60)

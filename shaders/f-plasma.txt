@@ -1,7 +1,6 @@
 #version 330
 
 uniform vec2      iResolution;           // viewport resolution (in pixels)
-//uniform vec2      k;
 uniform float     iTime;                 // shader playback time (in seconds)
 uniform float     iTimeDelta;            // render time (in seconds)
 uniform float     iFrameRate;            // shader frame rate
@@ -50,6 +49,12 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
 	ret = vec3(sin(v), sin(v+(.5+t)*PI), sin(v+1.0*PI)-.5);
 			
 	ret = 0.5 + 0.5*ret;
+
+    //ret.xy /= 10;
+    //ret.z /= 4;
+
+    ret.xy /= 8;
+    ret.z /= 3;
 	
     vec3 pixel = ret;
       

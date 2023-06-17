@@ -7,16 +7,15 @@ from csTabButton import csTabButton
 import threading as th
 
 class csTab:
-    def __init__(self, sc, brightness):
-        self.sc = sc
+    def __init__(self, brightness):
         self.brightness = brightness
         self.color_off = (0, 0, self.brightness, 127)
         self.color_on = (0, self.brightness, 0, 127)
-        #self.text = 'A'
         self.ctx = None
         self.lock = th.Lock()
 
-    def resize(self, font, wk_height, indent, bw, bh):
+    def resize(self, sc, font, wk_height, indent, bw, bh):
+        self.sc = sc
         self.width = width = self.sc.get_width()
         self.height = wk_height
         self.w = bw

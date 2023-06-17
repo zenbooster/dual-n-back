@@ -4,9 +4,9 @@
 # Imports
 import sys
 import pygame as pg
+import pygame_shaders as pgsh
 import random as rnd
 from threading import Timer
-from plasma import csPlasma
 from csTab import csTab
 from csStatusPan import csStatusPan
 from csUtil import csUtil
@@ -68,13 +68,20 @@ class csDNB:
             self.t = Timer(2, self.timeout)
             self.t.start()
     
-    def resize(self):
-        self.width = width = self.sc.get_width()
-        self.height = height = self.sc.get_height()
+    def resize(self, wh):
+        width, height = self.width, self.height = wh
         self.indent = height // 25
 
+        self.sc = sc = pg.display.set_mode(wh, pg.OPENGL | pg.DOUBLEBUF | pg.HWSURFACE | pg.RESIZABLE)
+        self.ds = ds = pg.Surface(wh, pg.SRCALPHA)
+
+        #self.shd_bg = pgsh.Shader(wh, wh, (0, 0), "shaders/v-default.txt", "shaders/f-plasma.txt", ds)
+        #self.shd_bg = pgsh.Shader(wh, wh, (0, 0), "shaders/v-default.txt", "shaders/f-art.txt", ds)
+        self.shd_bg = pgsh.Shader(wh, wh, (0, 0), "shaders/v-default.txt", "shaders/f-smoke-mirrors.txt", ds)
+        #self.shd_test = pgsh.Shader(wh, wh, (0, 0), "shaders/v-default.txt", "shaders/f-test.txt", ds)
+        self.shd_blit = pgsh.Shader(wh, wh, (0, 0), "shaders/v-blit.txt", "shaders/f-blit.txt", ds)
+
         pg.font.init()
-        #self.font = font = pg.font.SysFont('arial', self.h // 2)
         height = self.height
         indent = self.indent
         self.font = font = pg.font.SysFont('arial', (height - height // 10 + 2 * indent) // 10)
@@ -82,26 +89,25 @@ class csDNB:
         self.font_big.bold = True
 
         s_pause = "ПАУЗА"
-        self.tx_pause = csText(self.sc, font_big, s_pause, (self.brightness, 0, 0))
+        self.tx_pause = csText(self.ds, font_big, s_pause, (self.brightness, 0, 0))
         self.tx_pause.tsc.set_alpha(0x9f)
 
         status_pan = self.status_pan
-        status_pan.resize(font, self.indent)
+        status_pan.resize(ds, font, self.indent)
 
         bw = width // 5
         bh = status_pan.get_top() // 5
         tab = self.tab
-        tab.resize(font, self.height - status_pan.get_height(), self.indent, bw, bh)
+        tab.resize(ds, font, self.height - status_pan.get_height(), self.indent, bw, bh)
 
     def __init__(self):
         pg.init()
 
         self.fps = 60
         self.fpsClock = pg.time.Clock()
-        #width, height = 1024, 768
-        k = 3
-        width, height = 1024//k, 768//k
-        sc = self.sc = pg.display.set_mode((width, height), pg.RESIZABLE)
+        width, height = 1024, 768
+        k = 1
+        wh = (width, height) = 1024//k, 768//k
 
         self.brightness = 255
         self.alpha = 0x7f
@@ -109,9 +115,10 @@ class csDNB:
         self.color_bt_ok = (0, self.brightness, 0)
         self.color_bt_err = (self.brightness, 0, 0)
 
-        self.tab = tab = csTab(self.sc, self.brightness)
-        self.status_pan = status_pan = csStatusPan(self.sc, self.brightness, self.alpha)
-        self.resize()
+        self.tab = tab = csTab(self.brightness)
+        self.status_pan = status_pan = csStatusPan(self.brightness, self.alpha)
+        #self.status_pan = status_pan = csStatusPan(self.brightness, self.alpha * 1.2)
+        self.resize(wh)
 
         self.n = 2
         self.seq_a = []
@@ -131,8 +138,6 @@ class csDNB:
         self.i_step = 0
 
         self.i_on = 0
-
-        self.plasma = csPlasma(sc)
         
         rnd.seed()
         self.running = True
@@ -142,14 +147,14 @@ class csDNB:
     def run(self):
         self.timeout()
 
+        dt = 1.0
         # Game loop.
         while  True:
-            #self.sc.fill((0, 0, 0))
-            self.plasma.run()
+            self.ds.fill((0, 0, 0, 0))
 
             for event in pg.event.get():
                 if event.type == pg.VIDEORESIZE:
-                    self.resize()
+                    self.resize(event.dict['size'])
                 elif event.type == pg.QUIT:
                     self.running = False
                     self.t.cancel()
@@ -219,7 +224,7 @@ class csDNB:
 
             # Main Loop Code belongs here
             self.tab.draw()
-            
+
             if not self.is_a_clicked:
                 bt_a_color = self.color_bt_wait
             if not self.is_b_clicked:
@@ -229,6 +234,21 @@ class csDNB:
 
             if self.is_paused:
                 self.tx_pause.draw(((self.width - self.tx_pause.w) // 2, (self.height - self.tx_pause.h - self.status_pan.get_height()) // 2))
+
+            shd_bg = self.shd_bg
+            shd_bg.send('iResolution', [1, 1])
+            shd_bg.send('iTime', [dt])
+            shd_bg.render(self.ds)
+            '''
+            shd_test = self.shd_test
+            shd_test.send('iResolution', [1, 1])
+            shd_test.send('iTime', [dt])
+            shd_test.send('iChannel0', )
+            shd_test.render(self.ds)
+            '''
+            dt += 0.01
+
+            self.shd_blit.render(self.ds)
 
             pg.display.flip()
             self.fpsClock.tick(self.fps)
