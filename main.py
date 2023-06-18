@@ -65,7 +65,7 @@ class csDNB:
 
             self.i_step += 1
 
-            self.t = Timer(2, self.timeout)
+            self.t = Timer(self.sec_per_step, self.timeout)
             self.t.start()
     
     def resize(self, wh):
@@ -121,6 +121,9 @@ class csDNB:
         self.resize(wh)
 
         self.n = 2
+        self.sec_per_step = 1.5
+        #self.n = 3
+        #self.sec_per_step = 4.0
         self.seq_a = []
         self.seq_b = []
 
@@ -207,6 +210,7 @@ class csDNB:
                                     else:
                                         bt_b_color = self.color_bt_err
                                         self.status_pan.score_b.dec()
+                                    
                             elif not self.is_a_released and (event.button == 5):
                                 self.is_a_clicked = True
                                 if len(self.seq_a) > self.n:
@@ -216,6 +220,7 @@ class csDNB:
                                     else:
                                         bt_a_color = self.color_bt_err
                                         self.status_pan.score_a.dec()
+
                         elif event.type == pg.JOYBUTTONUP:
                             if event.button == 4:
                                 self.is_b_released = True
