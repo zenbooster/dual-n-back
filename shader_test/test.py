@@ -2,12 +2,50 @@ import sys
 import pygame
 import pygame_shaders
 
+#OpenGL
+import OpenGL 
+from OpenGL.GL import *
+from OpenGL.GLU import *
+from OpenGL.GLUT import *
+from OpenGL.GLUT.special import *
+from OpenGL.GL.shaders import *
+
+import cv2
+import numpy as np
+
+from PIL import Image
 
 class csApp:
+    def ScreenShot(self, filename):
+        width, height = self.w, self.h
+        glReadBuffer(GL_FRONT)
+        pixels = glReadPixels(0,0,width,height,GL_RGB,GL_UNSIGNED_BYTE)
+        
+        image = Image.frombytes("RGB", (width, height), pixels)
+        image = image.transpose( Image.FLIP_TOP_BOTTOM)
+        image.save(filename)
+
+    def cnvt_pil_to_cv2(pil_img):
+        open_cv_image = np.array(pil_img) 
+        # Convert RGB to BGR 
+        open_cv_image = open_cv_image[:, :, ::-1].copy()     
+        return open_cv_image
+
+    def ScreenRec(self):
+        width, height = self.w, self.h
+        glReadBuffer(GL_FRONT)
+        pixels = glReadPixels(0,0,width,height,GL_RGB,GL_UNSIGNED_BYTE)
+        
+        image = Image.frombytes("RGB", (width, height), pixels)
+        image = image.transpose( Image.FLIP_TOP_BOTTOM)
+        #image.save(filename)
+        self.out.write(csApp.cnvt_pil_to_cv2(image))
+
     def resize(self, sz):
-        print(f'HIT.1: sz={sz}')
-        w, h = sz
-        screen = pygame.display.set_mode((w, h), pygame.OPENGL | pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE)
+        #print(f'HIT.1: sz={sz}')
+        self.w, self.h = w, h = sz
+        self.out = cv2.VideoWriter('output.avi',self.fourcc, 20.0, sz)
+        self.screen = pygame.display.set_mode((w, h), pygame.OPENGL | pygame.DOUBLEBUF | pygame.HWSURFACE | pygame.RESIZABLE)
         self.display = display = pygame.Surface((w, h))
         display.set_colorkey((0, 0, 0))
         self.shd_plasma = pygame_shaders.Shader((w, h), (w, h), (0, 0), "shaders/v-default.txt", "shaders/f-golfing-ether.txt", display)
@@ -15,6 +53,7 @@ class csApp:
         self.shd_blit = pygame_shaders.Shader((w, h), (w, h), (0, 0), "shaders/v-blit.txt", "shaders/f-blit.txt", display)
     
     def __init__(self):
+        self.fourcc = cv2.VideoWriter_fourcc(*'XVID')
         pygame.init()
 
         self.resize((1000, 1000));
@@ -22,6 +61,7 @@ class csApp:
         self.dt = 1.0
 
     def run(self):
+        is_captured = False
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.VIDEORESIZE:
@@ -42,8 +82,14 @@ class csApp:
             #print('HIT.5')
             self.shd_blit.render(display)
             #print('HIT.6')
-            self.dt += 0.01
+            self.dt += 0.1
+            #self.dt += 0.2
             pygame.display.flip()
+            self.ScreenRec()
+            if not is_captured:
+                self.ScreenShot("screenshot.jpeg")
+                is_captured = True
+
             self.clock.tick(60)
 
 csApp().run()

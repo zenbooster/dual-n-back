@@ -9,7 +9,8 @@ import threading as th
 class csTab:
     def __init__(self, brightness):
         self.brightness = brightness
-        self.color_off = (0, 0, self.brightness, 127)
+        #self.color_off = (0, 0, self.brightness, 127)
+        self.color_off = (0, 0, 0x30, 127)
         self.color_on = (0, self.brightness, 0, 127)
         self.ctx = None
         self.lock = th.Lock()
