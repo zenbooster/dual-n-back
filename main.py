@@ -75,11 +75,11 @@ class csDNB:
         self.sc = sc = pg.display.set_mode(wh, pg.OPENGL | pg.DOUBLEBUF | pg.HWSURFACE | pg.RESIZABLE)
         self.ds = ds = pg.Surface(wh, pg.SRCALPHA)
 
-        #self.shd_bg = pgsh.Shader(wh, wh, (0, 0), "shaders/v-default.txt", "shaders/f-plasma.txt", ds)
-        #self.shd_bg = pgsh.Shader(wh, wh, (0, 0), "shaders/v-default.txt", "shaders/f-art.txt", ds)
-        self.shd_bg = pgsh.Shader(wh, wh, (0, 0), "shaders/v-default.txt", "shaders/f-smoke-mirrors.txt", ds)
-        #self.shd_test = pgsh.Shader(wh, wh, (0, 0), "shaders/v-default.txt", "shaders/f-test.txt", ds)
-        self.shd_blit = pgsh.Shader(wh, wh, (0, 0), "shaders/v-blit.txt", "shaders/f-blit.txt", ds)
+        #self.shd_bg = pgsh.Shader(wh, wh, (0, 0), "shaders/default.vert", "shaders/plasma.frag", ds)
+        #self.shd_bg = pgsh.Shader(wh, wh, (0, 0), "shaders/default.vert", "shaders/art.frag", ds)
+        self.shd_bg = pgsh.Shader(wh, wh, (0, 0), "shaders/default.vert", "shaders/smoke-mirrors.frag", ds)
+        #self.shd_test = pgsh.Shader(wh, wh, (0, 0), "shaders/default.vert", "shaders/test.frag", ds)
+        self.shd_blit = pgsh.Shader(wh, wh, (0, 0), "shaders/blit.vert", "shaders/blit.frag", ds)
 
         pg.font.init()
         height = self.height
